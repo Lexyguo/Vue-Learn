@@ -19,38 +19,36 @@
 import FInput from "./FInput.vue";
 import FFormItem from "./FFormItem.vue";
 import FForm from "./FForm.vue";
-import Notice from "../Notice.vue";
-import create from "../../utils/create.js";
 export default {
   components: {
     FForm,
     FInput,
-    FFormItem
+    FFormItem,
   },
   data() {
     return {
       form: {
         name: "",
-        age: ""
+        age: "",
       },
       rules: {
         name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
-        age: [{ required: true, message: "请输入年龄", trigger: "blur" }]
-      }
+        age: [{ required: true, message: "请输入年龄", trigger: "blur" }],
+      },
     };
   },
   methods: {
     login() {
-      this.$refs["form"].validate(valid => {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
-          create(Notice, {
+          this.$notice({
             title: "暗号",
-            message: "村长喊你来搬砖" // "欢迎你呀！" + this.form.name,
+            message: "村长喊你来搬砖", // "欢迎你呀！" + this.form.name,
           }).show();
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

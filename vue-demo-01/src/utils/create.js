@@ -1,6 +1,7 @@
 import Vue from 'vue'
+import Notice from "@/components/Notice.vue"
 
-export default function create(Component, props) {
+function create(Component, props) {
   // 方法一：Vue.extend 生成组件的构造函数
   const Profile = Vue.extend(Component);
 
@@ -33,4 +34,12 @@ export default function create(Component, props) {
   // }
 
   return comp;
+}
+
+export default {
+  install(Vue) {
+    Vue.prototype.$notice = function (options) {
+      return create(Notice, options)
+    }
+  }
 }
