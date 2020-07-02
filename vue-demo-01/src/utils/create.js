@@ -4,16 +4,9 @@ export default function create(Component, props) {
   // 方法一：Vue.extend 生成组件的构造函数
   const Profile = Vue.extend(Component);
 
-  // 生成一个用来替换的元素
-  const div = document.createElement('div');
-  document.body.appendChild(div);
-
   // 创建 Profile 实例，并挂载到生成的元素上。
-  const comp = new Profile({
-    propsData: {
-      ...props
-    }
-  }).$mount(div);
+  const comp = new Profile({ propsData: props }).$mount();
+  document.body.appendChild(comp.$el);
 
   // 删除函数
   comp.remove = () => {

@@ -6,6 +6,7 @@
 
 <script>
 export default {
+  componentName: "FForm",
   provide() {
     return {
       form: this
@@ -23,7 +24,7 @@ export default {
       // 全局校验方法
       // 1.执行内部所有FormItem校验方法，统一处理结果
       // 将FormItem数组转换为Promise数组
-      const tasks = this.$children
+      const tasks = this.field
         .filter(item => item.prop)
         .map(item => item.validate());
 
@@ -32,6 +33,14 @@ export default {
         .then(() => cb(true))
         .catch(() => cb(false));
     }
+  },
+  created() {
+    this.field = [];
+    this.$on("fake.form.addField", field => {
+      if (field) {
+        this.field.push(field);
+      }
+    });
   }
 };
 </script>

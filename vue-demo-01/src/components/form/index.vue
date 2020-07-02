@@ -1,6 +1,7 @@
 <template>
   <div>
     <f-form ref="form" :model="form" :rules="rules">
+      <f-input v-model="form.id" hidden="true"></f-input>
       <f-formItem label="姓名" prop="name">
         <f-input v-model="form.name" placeholder="请输入你的姓名"></f-input>
       </f-formItem>
@@ -24,32 +25,32 @@ export default {
   components: {
     FForm,
     FInput,
-    FFormItem,
+    FFormItem
   },
   data() {
     return {
       form: {
         name: "",
-        age: 0,
+        age: ""
       },
       rules: {
         name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
-        age: [{ required: true, message: "请输入年龄", trigger: "blur" }],
-      },
+        age: [{ required: true, message: "请输入年龄", trigger: "blur" }]
+      }
     };
   },
   methods: {
     login() {
-      this.$refs["form"].validate((valid) => {
+      this.$refs["form"].validate(valid => {
         if (valid) {
           create(Notice, {
             title: "暗号",
-            message: "村长喊你来搬砖", // "欢迎你呀！" + this.form.name,
+            message: "村长喊你来搬砖" // "欢迎你呀！" + this.form.name,
           }).show();
         }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 

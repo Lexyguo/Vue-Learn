@@ -1,17 +1,20 @@
 <template>
   <div class="f-form-item">
-    <label v-if="label">{{label}}</label>
     <div>
+      <label v-if="label">{{label}}</label>
       <slot></slot>
-      <p v-if="validateMessage">{{validateMessage}}</p>
     </div>
+    <span v-if="validateMessage" class="error">{{validateMessage}}</span>
   </div>
 </template>
 
 <script>
 import AsyncValidator from "async-validator";
+import emitter from "@/mixins/emitter";
 export default {
+  componentName: "FFormItem",
   inject: ["form"],
+  mixins: [emitter],
   props: {
     label: {
       type: String,
@@ -54,17 +57,28 @@ export default {
     this.$on("validate", () => {
       this.validate();
     });
+    // 派发事件通知Form新增Item实例
+    this.dispatch("FForm", "fake.form.addField", [this]);
   }
 };
 </script>
 
 <style scoped>
-.f-form-item {
+div {
   display: inline-flex;
   align-items: center;
+}
+
+.f-form-item {
+  flex-direction: column;
   margin-bottom: 30px;
 }
 label {
   min-width: 100px;
+}
+.error {
+  margin-left: 100px;
+  margin-top: 10px;
+  text-align: left;
 }
 </style>
