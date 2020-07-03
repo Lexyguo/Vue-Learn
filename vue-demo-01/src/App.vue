@@ -2,24 +2,27 @@
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png" />
     <!-- <Communication /> -->
-    <Form></Form>
+    <!-- <Form></Form> -->
+    <Recursive></Recursive>
   </div>
 </template>
 
 <script>
 // import Communication from "./components/communication";
-import Form from "./components/form";
+// import Form from "./components/form";
+import Recursive from "./components/recursive";
 
 export default {
   name: "App",
   components: {
     // Communication
-    Form,
+    // Form
+    Recursive
   },
   data() {
     return {};
   },
-  methods: {},
+  methods: {}
 };
 </script>
 
