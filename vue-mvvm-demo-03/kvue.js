@@ -17,6 +17,7 @@ function defineReactive(obj, key, val) {
     })
 }
 
+// 对象响应式处理
 function observe(obj) {
     // 判断obj类型必须是对象
     if (typeof obj !== 'object' || obj == null) {
@@ -26,6 +27,22 @@ function observe(obj) {
     new Observe(obj);
 }
 
+// 将$data中的key代理到KVue实例上
+function proxy(vm) {
+    Object.keys(vm.$data).forEach(key => {
+        Object.defineProperty(vm, key, {
+            get() {
+                return vm.$data[key]
+            },
+            set(newVal) {
+                if (newVal !== vm.$data[key]) {
+                    vm.$data[key] = newVal
+                }
+            }
+        })
+    })
+}
+
 class KVue {
     constructor(options) {
         // 保存选项
@@ -33,6 +50,8 @@ class KVue {
         this.$data = options.data
         // 相应化处理
         observe(this.$data)
+
+        proxy(this)
     }
 
 }
