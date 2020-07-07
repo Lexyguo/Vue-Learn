@@ -52,10 +52,10 @@ function proxy(vm) {
 
 class KVue {
     constructor(options) {
-        console.log(options)
         // 保存选项
         this.$options = options
         this.$data = options.data
+        this.$methods = options.methods
 
         // 相应化处理
         observe(this.$data)
@@ -125,6 +125,7 @@ class Compile {
     // 编译节点
     compileElement(node) {
         const attributes = node.attributes
+        const vm = this.$vm;
         Array.from(attributes).forEach(attr => {
             const atrName = attr.name
             const exp = attr.value
@@ -136,11 +137,13 @@ class Compile {
                     // 执行指令
                     this[dir] && this[dir](node, exp)
                 } else {
-                    console.log(this)
-                    // console.log(atrName, eval(exp))
-                    if (eval(exp)) {
-                        node.addEventListener(atrName.replace('@', ''), eval(exp), this.$vm)
+                    // fn类型：1、表达式 2、methods里定义的fn
+                    const target = this.$vm;
+                    this.event = function bindEvent(target) {
+                        return vm.$methods[exp] ? vm.$methods[exp] : new Function(exp);
                     }
+
+                    node.addEventListener(atrName.replace('@', ''), this.event.apply(this, target), this.$vm)
                 }
             }
 

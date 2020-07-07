@@ -7,8 +7,8 @@
   </head>
   <body>
     <div id="app">
-      <p>couter:{{couter}}</p>
-      <p k-text="couter" @click="()=>{app.couter++;}"></p>
+      <p @click="clickAdd">couter:{{couter}}</p>
+      <p k-text="couter" @click="()=>{couter++;}"></p>
 
       <input type="text" name="desc" id="desc" @input="handleInput" />
       <p k-html="desc"></p>
@@ -19,14 +19,18 @@
         el: "#app",
         data: {
           couter: 1,
-          desc:"西瓜西瓜我是冬瓜"
+          desc: "西瓜西瓜我是冬瓜",
         },
         methods: {
-          handleInput() {
-            // this必须是组件实例
+          handleInput(event) {
+            console.log("handleInput--", event);
             console.log(this);
-            
-          }
+            // this = value;
+          },
+          clickAdd({ target }) {
+            console.log(this);
+            this.couter++;
+          },
         },
       });
       // setInterval(() => {
