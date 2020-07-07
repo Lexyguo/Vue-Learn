@@ -50,6 +50,15 @@ function proxy(vm) {
     })
 }
 
+function def(obj, key, val, enumerable) {
+    Object.defineProperty(obj, key, {
+        value: val,
+        enumerable: !!enumerable,
+        writable: true,
+        configurable: true
+    })
+}
+
 class KVue {
     constructor(options) {
         // 保存选项
@@ -68,18 +77,81 @@ class KVue {
 
 }
 
+function protoAugment(target, src) {
+    target.__proto__ = src
+}
+
+function copyAugment(target, src, keys) {
+    for (let i = 0, l = keys.length; i < l; i++) {
+        const key = keys[i]
+        def(target, key, src[key])
+    }
+}
+const hasProto = '__proto__' in {}
+const arrayProto = Array.prototype
+const arrayMethods = Object.create(arrayProto)
+
+const methodsToPatch = [
+    'push',
+    'pop',
+    'shift',
+    'unshift',
+    'splice',
+    'sort',
+    'reverse'
+]
+
+methodsToPatch.forEach(function (method) {
+    // cache original method
+    const original = arrayProto[method]
+    def(arrayMethods, method, function mutator(...args) {
+        const result = original.apply(this, args)
+        const ob = this.__ob__
+        let inserted
+        switch (method) {
+            case 'push':
+            case 'unshift':
+                inserted = args
+                break
+            case 'splice':
+                inserted = args.slice(2)
+                break
+        }
+        if (inserted) ob.observeArray(inserted)
+        // notify change
+        ob.dep.notify()
+        return result
+    })
+})
+const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 class Observe {
     constructor(value) {
         this.value = value
-
+        this.dep = new Dep()
+        def(value, '__ob__', this)
         // 判断value是obj还是数组
-        this.walk(value)
+        if (Array.isArray(value)) {
+            if (hasProto) {
+                protoAugment(value, arrayMethods)
+            } else {
+                copyAugment(value, arrayMethods, arrayKeys)
+            }
+            this.observeArray(value)
+        } else {
+            this.walk(value)
+        }
     }
 
     walk(obj) {
         Object.keys(obj).forEach(key => defineReactive(obj, key, obj[key]))
-
     }
+
+    observeArray(items) {
+        for (let i = 0, l = items.length; i < l; i++) {
+            observe(items[i])
+        }
+    }
+
 }
 
 class Compile {
@@ -125,7 +197,7 @@ class Compile {
     // 编译节点
     compileElement(node) {
         const attributes = node.attributes
-        const vm = this.$vm;
+        node.events = {}
         Array.from(attributes).forEach(attr => {
             const atrName = attr.name
             const exp = attr.value
@@ -138,12 +210,19 @@ class Compile {
                     this[dir] && this[dir](node, exp)
                 } else {
                     // fn类型：1、表达式 2、methods里定义的fn
-                    const target = this.$vm;
-                    this.event = function bindEvent(target) {
-                        return vm.$methods[exp] ? vm.$methods[exp] : new Function(exp);
+                    const vm = this.$vm;
+                    node.events[exp] = function bindEvent(target) {
+                        var event = vm.$methods[exp] || new Function(exp)
+
+                        return event && event.call(this.$vm, target);
                     }
 
-                    node.addEventListener(atrName.replace('@', ''), this.event.apply(this, target), this.$vm)
+                    const name = atrName.replace('@', '').split('.')[0]
+                    node.addEventListener(name, node.events[exp].bind(this))
+                    // 更新
+                    new Watcher(vm, exp, function (fn) {
+                        node.addEventListener(name, fn.bind(this))
+                    })
                 }
             }
 

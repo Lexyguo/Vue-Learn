@@ -7,11 +7,11 @@
   </head>
   <body>
     <div id="app">
-      <p @click="clickAdd">couter:{{couter}}</p>
-      <p k-text="couter" @click="()=>{couter++;}"></p>
-
+      <p @click="clickAdd">{{couter}}</p>
+      <p k-text="couter" @click="this.couter++"></p>
       <input type="text" name="desc" id="desc" @input="handleInput" />
       <p k-html="desc"></p>
+      <input type="text" name="name" id="names" @input="handleAddName" />
     </div>
     <script src="kvue.js"></script>
     <script>
@@ -20,17 +20,21 @@
         data: {
           couter: 1,
           desc: "西瓜西瓜我是冬瓜",
+          list:[{name:'张三'},{name:'李四'}]
         },
         methods: {
           handleInput(event) {
-            console.log("handleInput--", event);
-            console.log(this);
-            // this = value;
+            this.desc += event.data;
           },
           clickAdd({ target }) {
-            console.log(this);
-            this.couter++;
+            setTimeout(() => {
+              this.couter +=1;
+            }, 1000);
           },
+          handleAddName(event){
+            this.list.push(event.data)
+            console.log(this.list)
+          }
         },
       });
       // setInterval(() => {
