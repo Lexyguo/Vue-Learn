@@ -1,3 +1,5 @@
+import View from './fvue-router-view'
+import Link from './fvue-router-link'
 let _fVue;
 
 // 插件实现
@@ -6,8 +8,14 @@ class FVueRouter {
         this.$options = options;
 
         // 响应式数据（只有响应式数据才能让render（）在数据刷新完后重新渲染）
-        const inital = window.location.hash.slice(1) || '/';
-        _fVue.util.defineReactive(this, 'current', inital);
+        // 方法1
+        // const inital = window.location.hash.slice(1) || '/';
+        // _fVue.util.defineReactive(this, 'current', inital);
+
+        // 方法2
+        this.current = window.location.hash.slice(1) || '/'
+        _fVue.util.defineReactive(this, 'matched', []);
+        this.match()
 
         // 监听事件
         window.addEventListener('hashchange', this.onHashChange.bind(this))
@@ -15,7 +23,7 @@ class FVueRouter {
 
         // the path list is used to control path matching priority
         this.pathList = []
-        // $flow-disable-line
+        // 缓存路由映射关系
         this.routeMap = Object.create(null)
         // $flow-disable-line
         this.nameMap = Object.create(null)
@@ -37,6 +45,8 @@ class FVueRouter {
 
     onHashChange() {
         this.current = window.location.hash.slice(1)
+        this.matched = []
+        this.match()
     }
 
     addRouteRecord(pathList, pathMap, nameMap, route, parent, matchAs) {
@@ -66,21 +76,6 @@ class FVueRouter {
 
         // 如果存在子路由则将子路由进行添加到Map中
         if (route.children) {
-            // Warn if route is named, does not redirect and has a default child route.
-            // If users navigate to this route by name, the default child will
-            // not be rendered (GH Issue #629)
-            if (process.env.NODE_ENV !== 'production') {
-                if (route.name && !route.redirect && route.children.some(child => /^\/?$/.test(child.path))) {
-                    console.error(
-                        false,
-                        `Named Route '${route.name}' has a default child route. ` +
-                        `When navigating to this named route (:to="{name: '${route.name}'"), ` +
-                        `the default child route will not be rendered. Remove the name from ` +
-                        `this route and use the name of the default child route for named ` +
-                        `links instead.`
-                    )
-                }
-            }
             route.children.forEach(child => {
                 const childMatchAs = matchAs
                     ? cleanPath(`${matchAs}/${child.path}`)
@@ -106,6 +101,24 @@ class FVueRouter {
             }
         }
 
+    }
+
+    match(routes) {
+        routes = routes || this.$options.routes
+        // 递归遍历
+        for (const route in routes) {
+            if (route.path === '/' && this.current === '/') {
+                this.matched.push(route)
+                return;
+            }
+            if (route.path !== '/' && this.current.indexOf(route.path) !== -1) {
+                this.matched.push(route)
+                if (route.children) {
+                    this.match(route.children)
+                }
+                return;
+            }
+        }
     }
 }
 
@@ -139,35 +152,8 @@ FVueRouter.install = function (Vue) {
 
     // 2、实现两个组件 router-view、router-link
 
-    Vue.component('router-link', {
-        props: {
-            to: {
-                type: String,
-                require: true
-            }
-        },
-        render(h) {
-            return h(
-                'a',
-                {
-                    attrs: {
-                        href: '#' + this.to
-                    }
-                },
-                this.$slots.default
-            )
-        }
-
-    })
-
-    Vue.component('router-view', {
-        render(h) {
-            // 获取路由实例
-            const { routeMap, current } = this.$router;
-            const comp = routeMap[current] ? routeMap[current].components.default : null;
-            return h(comp);
-        }
-    })
+    Vue.component('router-link', Link)
+    Vue.component('router-view', View)
 
 }
 

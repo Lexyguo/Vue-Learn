@@ -1,9 +1,8 @@
 <template>
   <div id="app">
     <div class="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link><br />
-      <router-link to="/hello">Hello</router-link>
+      <router-link to="/">Home</router-link>|
+      <router-link to="/about">About</router-link>
     </div>
     <router-view></router-view>
   </div>
@@ -12,7 +11,7 @@
 <script>
 // 因为RouterView在router插件安装过程中已经被全局安装了，所以这里不需要再引入
 export default {
-  name: "App",
+  name: "App"
 };
 </script>
 

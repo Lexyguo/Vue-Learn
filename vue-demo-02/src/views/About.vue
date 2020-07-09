@@ -1,6 +1,7 @@
 <template>
   <div>
     <h1>{{ title }}</h1>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -8,8 +9,8 @@
 export default {
   data() {
     return {
-      title: "Here is a demo about vue-router!",
+      title: "Here is a demo about vue-router!"
     };
-  },
+  }
 };
 </script>
